@@ -17,3 +17,63 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+
+class Character(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True,nullable=False)
+    gender = db.Column(db.String(120), nullable=False)
+    faction = db.Column(db.String(120), nullable=False)
+    race = db.Column(db.String(120), nullable=False)
+    homeworld = db.Column(db.String(120), nullable=False)
+
+    #if we receive post with new character to be created, need this
+    def __init__(self, name,gender,faction,race,homeworld):
+        self.name = name
+        self.gender = gender
+        self.faction = faction
+        self.race = race
+        self.homeworld = homeworld
+
+    #if we would like to print the character
+    def __repr__(self):
+        return f'<Character {self.name}>'
+    
+    #to send as response need to serialize to jsonify later on
+    def serialize(self):
+        return{
+            "id": self.id,
+            "name": self.name,
+            "gender": self.gender,
+            "faction": self.faction,
+            "race": self.race,
+            "homeworld": self.homeworld,
+        }
+    
+class Planet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    terrain = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.String(250), nullable = False)
+    location = db.Column(db.String(250), nullable = False)
+    key_event = db.Column(db.String(250), nullable = False)
+
+    def __init__(self,name,terrain,description,location,key_event):
+        self.name = name,
+        self.terrain = terrain,
+        self.description = description,
+        self.location = location,
+        self.key_eventy = key_event
+
+    def __repr__(self):
+        return f'<Planet {self.name}>'
+    
+    def serialize(self):
+        return{
+            "id": self.id,
+            "name": self.name,
+            "terrain": self.terrain,
+            "description":self.description,
+            "location": self.location,
+            "key_event": self.key_event
+        }
+
