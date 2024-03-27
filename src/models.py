@@ -19,15 +19,6 @@ class User(db.Model):
             # do not serialize the password, its a security breach
         }
 
-class Character(db.Model):
-    __tablename__ = "character"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True,nullable=False)
-    gender = db.Column(db.String(120), nullable=False)
-    faction = db.Column(db.String(120), nullable=False)
-    race = db.Column(db.String(120), nullable=False)
-    homeworld = db.Column(db.String(120), nullable=False)
-
     #if we receive post with new character to be created, need this
     def __init__(self, name,gender,faction,race,homeworld):
         self.name = name
@@ -59,6 +50,8 @@ class Planet(db.Model):
     description = db.Column(db.String(250), nullable = False)
     location = db.Column(db.String(250), nullable = False)
     key_event = db.Column(db.String(250), nullable = False)
+    residents = db.relationship("Character")
+
 
     def __init__(self,name,terrain,description,location,key_event):
         self.name = name,
@@ -80,3 +73,14 @@ class Planet(db.Model):
             "key_event": self.key_event
         }
 
+class Character(db.Model):
+    __tablename__ = "character"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True,nullable=False)
+    gender = db.Column(db.String(120), nullable=False)
+    faction = db.Column(db.String(120), nullable=False)
+    race = db.Column(db.String(120), nullable=False)
+    # homeworld = db.Column(db.String(120), nullable=False) NO LONGER NEEDED SINCE CHARACTER COMES AFTER PLANET, AT CREATION WE WILL SELECT ONE BASED ON PLANET ID. 
+
+    homeworld_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
+    homeworld = db.relationship(Planet, backref="residents") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
