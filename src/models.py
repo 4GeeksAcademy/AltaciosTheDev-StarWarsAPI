@@ -5,27 +5,17 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
 
-    def __repr__(self):
-        return '<User %r>' % self.username
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            # do not serialize the password, its a security breach
-        }
-
     #if we receive post with new character to be created, need this
-    def __init__(self, name,gender,faction,race,homeworld):
+    def __init__(self, name,email,password,is_active):
         self.name = name
-        self.gender = gender
-        self.faction = faction
-        self.race = race
-        self.homeworld = homeworld
+        self.email = email
+        self.password = password
+        self.is_active = is_active
 
     #if we would like to print the character
     def __repr__(self):
@@ -36,10 +26,9 @@ class User(db.Model):
         return{
             "id": self.id,
             "name": self.name,
-            "gender": self.gender,
-            "faction": self.faction,
-            "race": self.race,
-            "homeworld": self.homeworld,
+            "email": self.email,
+            "is_active": self.is_active,
+            "favorites": [favorite.serialize() for favorite in self.favorites]
         }
     
 class Planet(db.Model):
@@ -69,7 +58,8 @@ class Planet(db.Model):
             "description":self.description,
             "location": self.location,
             "key_event": self.key_event,
-            "residents": [resident.serialize() for resident in self.residents]
+            "residents": [resident.serialize() for resident in self.residents],
+            "favorites": [favorite.serialize() for favorite in self.favorites]
         }
 
 class Character(db.Model):
@@ -99,5 +89,33 @@ class Character(db.Model):
             "faction": self.faction,
             "gender": self.gender,
             "race":self.race,
-            "homeland": self.homeworld.name
+            "homeland": self.homeworld.name,
+            "favorites": [favorite.serialize() for favorite in self.favorites]
         }
+
+class Favorite(db.Model):
+    __tablename__ = "favorite"
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
+    user = db.relationship(User, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
+
+
+    planet_id = db.Column(db.Integer,db.ForeignKey('planet.id'))
+    planet = db.relationship(Planet, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
+
+
+    character_id = db.Column(db.Integer,db.ForeignKey('character.id'))
+    character = db.relationship(Character, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
+
+    def __repr__(self):
+        return f'<Character {self.id}>'
+    
+    def serialize(self):
+        return{
+            "id": self.id,
+            "user": self.user.name,
+            "planet":self.planet.name,
+            "character": self.character.name
+        }
+
