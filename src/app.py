@@ -36,20 +36,27 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
-
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
-
-    return jsonify(response_body), 200
-
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
     return jsonify([user.serialize() for user in users],200)
+
+@app.route('/users/<int:id>', methods=['GET'])
+def get_user(id):
+
+    user = User.query.get(id)
+    
+    return jsonify(user.serialize()), 200
+
+@app.route('/users/<int:id>/favorites', methods=['GET'])
+def get_user_favorites(id):
+
+    user = User.query.get(id)
+    favorites = user.favorites
+
+    return jsonify([favorite.serialize() for favorite in favorites]), 200
+
 
 @app.route('/people', methods=["GET"])
 def get_people():
