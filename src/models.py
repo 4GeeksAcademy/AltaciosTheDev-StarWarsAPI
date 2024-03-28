@@ -19,7 +19,7 @@ class User(db.Model):
 
     #if we would like to print the character
     def __repr__(self):
-        return f'<Character {self.name}>'
+        return f'<User {self.name}>'
     
     #to send as response need to serialize to jsonify later on
     def serialize(self):
@@ -41,11 +41,11 @@ class Planet(db.Model):
     key_event = db.Column(db.String(250), nullable = False)
 
     def __init__(self,name,terrain,description,location,key_event):
-        self.name = name,
-        self.terrain = terrain,
-        self.description = description,
-        self.location = location,
-        self.key_eventy = key_event
+        self.name = name
+        self.terrain = terrain
+        self.description = description
+        self.location = location
+        self.key_event = key_event
 
     def __repr__(self):
         return f'<Planet {self.name}>'
@@ -74,10 +74,10 @@ class Character(db.Model):
     homeworld = db.relationship(Planet, backref="residents") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
 
     def __init__(self,name,gender,faction,race):
-        self.name = name,
-        self.gender = gender,
-        self.faction = faction,
-        self.race = race,
+        self.name = name
+        self.gender = gender
+        self.faction = faction
+        self.race = race
 
     def __repr__(self):
         return f'<Character {self.name}>'
@@ -101,15 +101,15 @@ class Favorite(db.Model):
     user = db.relationship(User, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
 
 
-    planet_id = db.Column(db.Integer,db.ForeignKey('planet.id'))
+    planet_id = db.Column(db.Integer,db.ForeignKey('planet.id'),nullable=True)
     planet = db.relationship(Planet, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
 
 
-    character_id = db.Column(db.Integer,db.ForeignKey('character.id'))
+    character_id = db.Column(db.Integer,db.ForeignKey('character.id'),nullable=True)
     character = db.relationship(Character, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
 
     def __repr__(self):
-        return f'<Character {self.id}>'
+        return f'<Favorite {self.id}>'
     
     def serialize(self):
         return{
