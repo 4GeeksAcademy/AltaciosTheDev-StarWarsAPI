@@ -108,6 +108,15 @@ class Favorite(db.Model):
     character_id = db.Column(db.Integer,db.ForeignKey('character.id'),nullable=True)
     character = db.relationship(Character, backref="favorites") #helps with a bi directional relationship in which we don't have to specify another and can access the residents of each planet, on the planet object.
 
+    def __init__(self, user, planet=None, character=None):
+        self.user = user
+        self.planet = planet
+        self.character = character
+
+        if (self.planet is None and self.character is None) or \
+           (self.planet is not None and self.character is not None):
+            raise ValueError("Please specify either a planet or a character, but not both.")
+
     def __repr__(self):
         return f'<Favorite {self.id}>'
     
