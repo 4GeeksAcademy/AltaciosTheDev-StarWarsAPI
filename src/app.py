@@ -45,6 +45,12 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    return jsonify([user.serialize() for user in users],200)
+
 @app.route('/people', methods=["GET"])
 def get_people():
     characters = Character.query.all()

@@ -28,7 +28,7 @@ class User(db.Model):
             "name": self.name,
             "email": self.email,
             "is_active": self.is_active,
-            "favorites": [favorite.serialize() for favorite in self.favorites]
+            "favorites": [favorite.serialize() for favorite in self.favorites] if self.favorites else None
         }
     
 class Planet(db.Model):
@@ -59,7 +59,7 @@ class Planet(db.Model):
             "location": self.location,
             "key_event": self.key_event,
             "residents": [resident.serialize() for resident in self.residents],
-            "favorites": [favorite.serialize() for favorite in self.favorites]
+            "favorites": [favorite.serialize() for favorite in self.favorites] if self.favorites else None
         }
 
 class Character(db.Model):
@@ -90,7 +90,7 @@ class Character(db.Model):
             "gender": self.gender,
             "race":self.race,
             "homeland": self.homeworld.name,
-            "favorites": [favorite.serialize() for favorite in self.favorites]
+            "favorites": [favorite.serialize() for favorite in self.favorites] if self.favorites else None
         }
 
 class Favorite(db.Model):
@@ -115,7 +115,7 @@ class Favorite(db.Model):
         return{
             "id": self.id,
             "user": self.user.name,
-            "planet":self.planet.name,
-            "character": self.character.name
+            "planet":self.planet.name if self.planet else None,
+            "character": self.character.name if self.character else None
         }
 
