@@ -9,9 +9,18 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Character, Planet
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+
 #from models import Person
 
 app = Flask(__name__)
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
+
 app.url_map.strict_slashes = False
 
 db_url = os.getenv("DATABASE_URL")
@@ -78,6 +87,31 @@ def get_planets():
 def get_planet(id):
     planet = Planet.query.get(id)
     return jsonify(planet.serialize()), 200
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+
+    # Query your database for email and password
+    user = User.query.filter_by(email=email, password=password).first()
+
+    if user is None:
+        # The user was not found on the database
+        return jsonify({"msg": "Bad email or password"}), 401
+    
+    # Create a new token with the user id inside
+    access_token = create_access_token(identity=user.email)
+    return jsonify({ "token": access_token, "user_id": user.id }) #
+
+@app.route("/users/favorites", methods=["GET"])
+@jwt_required()
+def get_current_user_favorites():
+    # Access the identity of the current user with get_jwt_identity
+    current_user_email = get_jwt_identity()
+    current_user = User.query.filter_by(email=current_user_email).first()
+    return jsonify(current_user.serialize()), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
