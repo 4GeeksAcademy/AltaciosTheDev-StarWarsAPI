@@ -121,10 +121,10 @@ def get_current_user_favorites():
     return jsonify(current_user.serialize()), 200
 
 #creates new favorite instance with the user from the identity and the id of the planet sent as query parameter
-@app.route("/favorite/planet/<int:planet_id>", methods=["POST"])
+@app.route("/favorite/planet/<int:planet_id>", methods=["POST", "DELETE"])
 @jwt_required()
 
-def add_favorite_planet_to_current_user(planet_id):
+def favorite_planet_to_current_user(planet_id):
     current_user_email = get_jwt_identity() #will provide email of currently logged user, accessible through the header's token
     current_user = User.query.filter_by(email=current_user_email).one_or_none()
 
@@ -138,20 +138,31 @@ def add_favorite_planet_to_current_user(planet_id):
     
     existing_favorite = Favorite.query.filter_by(user_id=current_user.id, planet_id=planet_to_favorite.id).one_or_none()
 
-    if existing_favorite:
-        return jsonify({"msg": f"Planet {planet_to_favorite.name}is already a favorite for user {current_user.email} "}), 400
+    if request.method == "POST":
+        if existing_favorite:
+            return jsonify({"msg": f"CANNOT FAVORITE, Planet {planet_to_favorite.name}is already a favorite for user {current_user.email} "}), 400
     
-    #current_user not None, planet_to_favorite not None AND existing_favorite is None, then:
-    new_favorite_planet = Favorite(user=current_user, planet=planet_to_favorite)
-    db.session.add(new_favorite_planet) # add new favorite object to the Favorite table
-    db.session.commit()  # Similar to the Git commit, what this does is save all the changes you have made 
-    return jsonify({"msg": f"Planet {planet_to_favorite.name}SUCCESSFULLY made a favorite for user {current_user.email}"}), 200
+        #current_user not None, planet_to_favorite not None AND existing_favorite is None, then:
+        new_favorite_planet = Favorite(user=current_user, planet=planet_to_favorite)
+        db.session.add(new_favorite_planet) # add new favorite object to the Favorite table
+        db.session.commit()  # Similar to the Git commit, what this does is save all the changes you have made 
+        return jsonify({"msg": f"Planet {planet_to_favorite.name}SUCCESSFULLY made a favorite for user {current_user.email}"}), 200
+    
+    else: #request.method == "DELETE"
+        if existing_favorite == None:
+            return jsonify({"msg": f"CANNOT DELETE, Planet {planet_to_favorite.name}is CURRENTLY NOT a favorite for user {current_user.email} "}), 400
+    
+        #current_user not None, planet_to_favorite not None AND existing_favorite is NOT None, then:
+        db.session.delete(existing_favorite) # add new favorite object to the Favorite table
+        db.session.commit()  # Similar to the Git commit, what this does is save all the changes you have made 
+        return jsonify({"msg": f"Planet {planet_to_favorite.name}SUCCESSFULLY DELETED from favorite for user {current_user.email}"}), 200
+
     
 #creates new favorite instance with the user from the identity and the id of the character sent as query parameter  
-@app.route("/favorite/people/<int:people_id>", methods=["POST"])
+@app.route("/favorite/people/<int:people_id>", methods=["POST", "DELETE"])
 @jwt_required()
 
-def add_favorite_character_to_current_user(people_id):
+def favorite_character_to_current_user(people_id):
     #identify user
     current_user_email = get_jwt_identity()
     current_user = User.query.filter_by(email=current_user_email).one_or_none()
@@ -168,21 +179,24 @@ def add_favorite_character_to_current_user(people_id):
     #check user already has character as favorite
     existing_favorite = Favorite.query.filter_by(user_id=current_user.id, character_id=character_to_favorite.id).one_or_none()
 
-    if existing_favorite:
-        return jsonify({"msg": f"Character {character_to_favorite.name} is already a favorite for user {current_user.email} "}), 400
+    if request.method == "POST":
+        if existing_favorite:
+            return jsonify({"msg": f"CANNOT FAVORITE, Character {character_to_favorite.name} is already a favorite for user {current_user.email} "}), 400
 
-    #finally, create new favorite
-    new_favorite_character = Favorite(user=current_user, character=character_to_favorite)
-    db.session.add(new_favorite_character)
-    db.session.commit()
-    return jsonify({"msg": f"Character {character_to_favorite.name} SUCCESSFULLY made a favorite for user {current_user.email}"}), 200
-
-
-
-
-
-
-
+        #finally, create new favorite
+        new_favorite_character = Favorite(user=current_user, character=character_to_favorite)
+        db.session.add(new_favorite_character)
+        db.session.commit()
+        return jsonify({"msg": f"Character {character_to_favorite.name} SUCCESSFULLY made a favorite for user {current_user.email}"}), 200
+    
+    else: #request.method == "DELETE"
+        if existing_favorite == None:
+            return jsonify({"msg": f"CANNOT DELETE, Character {character_to_favorite.name} is CURRENTLY NOT a favorite for user {current_user.email} "}), 400
+    
+        #current_user not None, planet_to_favorite not None AND existing_favorite is NOT None, then:
+        db.session.delete(existing_favorite) # add new favorite object to the Favorite table
+        db.session.commit()  # Similar to the Git commit, what this does is save all the changes you have made 
+        return jsonify({"msg": f"Character {character_to_favorite.name} SUCCESSFULLY DELETED from favorite for user {current_user.email}"}), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
