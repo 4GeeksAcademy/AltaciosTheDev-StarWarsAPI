@@ -113,9 +113,9 @@ class Favorite(db.Model):
         self.planet = planet
         self.character = character
 
-        if (self.planet is None and self.character is None) or \
-           (self.planet is not None and self.character is not None):
-            raise ValueError("Please specify either a planet or a character, but not both.")
+        # if (self.planet is None and self.character is None) or \
+        #    (self.planet is not None and self.character is not None):
+        #     raise ValueError("Please specify either a planet or a character, but not both.")
 
     def __repr__(self):
         return f'<Favorite {self.id}>'
