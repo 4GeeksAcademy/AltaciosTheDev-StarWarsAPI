@@ -89,7 +89,7 @@ class Character(db.Model):
             "faction": self.faction,
             "gender": self.gender,
             "race":self.race,
-            "homeland": self.homeworld.name,
+            "homeworld": self.homeworld.name if self.homeworld else None,
             "favorites": [favorite.serialize() for favorite in self.favorites] if self.favorites else None
         }
 
